@@ -1,0 +1,6 @@
+packages/
+S3Uploader/bin/Debug/MSharp.Framework.dll
+S3Uploader/bin/
+.vs/
+S3Uploader/obj/
+S3Uploader/S3Uploader.csproj.user
