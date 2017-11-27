@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using Amazon.S3;
 using Amazon.S3.Transfer;
@@ -7,6 +8,7 @@ class Program
 {
     static TransferUtility Util;
     static string[] Args;
+    static DirectoryInfo UploadAndDeleteSource;
 
     static string Param(string name)
     {
@@ -31,27 +33,27 @@ class Program
 
     static void Upload()
     {
-        var source = Param("uploadAndDelete").AsDirectory();
+        UploadAndDeleteSource = Param("uploadAndDelete").AsDirectory();
 
-        var toUpload = source.GetFiles(includeSubDirectories: true)
+        var toUpload = UploadAndDeleteSource.GetFiles(includeSubDirectories: true)
            .Select(x => x.AsFile()).OrderBy(x => x.CreationTimeUtc).ToArray();
 
         Console.WriteLine("Found " + toUpload.Length + " files to move to S3.");
 
-        foreach (var file in toUpload)
-        {
-            var key = file.Directory.FullName.TrimStart(source.FullName)
-                .TrimStart("\\").TrimEnd("\\").WithSuffix("/")
-                + file.NameWithoutExtension();
-
-            Console.Write("Moving key:" + key + "   file:" + file.FullName.TrimStart(source.FullName) + "...");
-
-            Util.Upload(file.FullName, Param("bucket"), key);
-            file.Delete();
-
-            Console.WriteLine("Done");
-        }
+        toUpload.AsParallel().ForAll(UploadFile);
 
         Console.WriteLine("Moved " + toUpload.Length + " files successfully.");
+    }
+
+    static void UploadFile(FileInfo file)
+    {
+        var key = file.Directory.FullName.TrimStart(UploadAndDeleteSource.FullName)
+              .TrimStart("\\").TrimEnd("\\").WithSuffix("/")
+              + file.NameWithoutExtension();
+
+        Console.Write("Moving key:" + key + "   file:" + file.FullName.TrimStart(UploadAndDeleteSource.FullName) + "...");
+
+        Util.Upload(file.FullName, Param("bucket"), key);
+        file.Delete();
     }
 }
