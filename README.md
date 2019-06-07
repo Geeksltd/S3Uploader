@@ -3,7 +3,7 @@ Simple utility to upload a whole folder to Amazon S3 with command line.
 
 To run the command line, use the following pattern:
 ```
-S3Uploader.exe /key:{KEY} /secret:{SECRET} /bucket:{BUCKET} /uploadAndDelete:{PATH}
+S3Uploader.exe /key:{KEY} /secret:{SECRET} /bucket:{BUCKET} /keepExtension:{true|false} /uploadAndDelete:{PATH}
 ```
 
 - `{KEY}` is the Access Key Id of the IAM user.
